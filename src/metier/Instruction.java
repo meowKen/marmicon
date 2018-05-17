@@ -12,6 +12,10 @@ public class Instruction {
 		this.instr = instr;
 		this.idOrdre = idOrdre;
 	}
+	public Instruction( int idOrdre, String instr) {
+		this.instr = instr;
+		this.idOrdre = idOrdre;
+	}
 
 	public String getInstr() {
 		return instr;

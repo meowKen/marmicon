@@ -13,6 +13,14 @@ public class Gateau {
 		this.nomGat = nomGat;
 	}
 	
+	public Gateau(String nomGat, Recette rec) {
+		this.nomGat = nomGat;
+		this.recette = rec;
+	}
+	public Gateau(int idGat, String nomGat) {
+		this.idGat = idGat;
+		this.nomGat = nomGat;
+	}
 	public Gateau(int idGat, int idRec, String nomGat, Recette recette) {
 		this.idGat = idGat;
 		this.idRec = idRec;
