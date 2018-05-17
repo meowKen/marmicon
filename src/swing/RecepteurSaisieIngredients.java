@@ -39,7 +39,7 @@ public class RecepteurSaisieIngredients extends JFrame implements ActionListener
 	 */
 	public RecepteurSaisieIngredients() {
 		ingredients = new ArrayList<Ingredient>();
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 596, 423);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -160,8 +160,10 @@ public class RecepteurSaisieIngredients extends JFrame implements ActionListener
 					&& ! textField.getText().isEmpty()
 					&& ! textField_2.getText().isEmpty()
 					&& InputControler.isNumeric(textField_2.getText())) {
-				liste.add(textField.getText()+" ");
+				liste.add(textField.getText());
 				liste2.add(textField_2.getText()+" "+comboBox.getItemAt(comboBox.getSelectedIndex()));
+				textField.setText("");
+				textField_2.setText("");
 			}
 		}
 		if(e.getSource() == btnSupprime) {
@@ -179,10 +181,12 @@ public class RecepteurSaisieIngredients extends JFrame implements ActionListener
 		
 		if(e.getSource() == btnValide) {
 			System.out.println("valide");
+			ingredients = new ArrayList<Ingredient>();
 			for(int i=0; i<liste.getItemCount(); i++) {
 				ingredients.add(new Ingredient(liste.getItem(i), liste2.getItem(i)));
 			}
-			System.out.println(ingredients);
+			//System.out.println(ingredients);
+			this.dispose();
 		}
 		
 	}

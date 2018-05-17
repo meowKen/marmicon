@@ -17,8 +17,8 @@ public class Recette {
 	}
 	
 	public Recette(String tmpPrep, List<Ingredient> listIngre, List<Instruction> listInstr) {
-		this.idRec = idRec;
-		this.idGat = idGat;
+		this.listInstr = listInstr;
+		this.listIngre = listIngre;
 		this.tmpPrep = tmpPrep;
 	}
 
