@@ -15,6 +15,12 @@ public class Recette {
 		this.idGat = idGat;
 		this.tmpPrep = tmpPrep;
 	}
+	
+	public Recette(String tmpPrep, List<Ingredient> listIngre, List<Instruction> listInstr) {
+		this.idRec = idRec;
+		this.idGat = idGat;
+		this.tmpPrep = tmpPrep;
+	}
 
 	public String getTmpPrep() {
 		return tmpPrep;
