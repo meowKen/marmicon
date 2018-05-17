@@ -277,7 +277,7 @@ public class GateauFenetre extends JFrame {
 		//------------------------- Compo -----------------------------------
 		
 		//   Panneau 1: Liste de gateaux
-		
+		this.setVisible(true);
 
 		
 		

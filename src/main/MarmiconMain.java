@@ -1,8 +1,7 @@
 package main;
 
-import swing.RecepteurSaisieInstruction;
 import swing.RecepteurSaisieGateau;
-import swing.RecepteurSaisieIngredients;;
+
 
 public class MarmiconMain {
 
@@ -11,6 +10,7 @@ public class MarmiconMain {
 		//RecepteurSaisieInstruction rsins = new RecepteurSaisieInstruction();
 		RecepteurSaisieGateau rsg = new RecepteurSaisieGateau();
 		
+		//GateauFenetre gf = new GateauFenetre();
 	}
 
 }
