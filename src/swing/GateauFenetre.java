@@ -11,6 +11,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import javafx.scene.Cursor;
+import metier.Gateau;
+import metier.GateauFenetreMethodes;
+import metier.Ingredient;
+import metier.Instruction;
 import sun.java2d.pipe.DrawImage;
 
 import java.awt.List;
@@ -29,22 +33,22 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.awt.SystemColor;
+import javax.swing.JTextField;
 
 public class GateauFenetre extends JFrame {
 
 	private JPanel contentPane;
 	
+	GateauFenetreMethodes gfm = new GateauFenetreMethodes();
+	
 	//img
-	ImageIcon imgCake = new ImageIcon("images/cake.jpg");
-	ImageIcon imgBG = new ImageIcon("images/cakeBG.jpg");
 	ImageIcon newCake = new ImageIcon("images/newCake.png");
 
-	ImageIcon newImg;
+	//ImageIcon newImg;
 	
-// dimension
-	//final int longueur = imgBG.getIconWidth();
-	//final int hauteur = imgBG.getIconHeight();
+	// dimension
 	final int longueur = 150*7;    // image 300 x 300px
 	final int hauteur =300*3;
 
@@ -53,8 +57,12 @@ public class GateauFenetre extends JFrame {
 	List listGat = new List();
 	List listInstruc = new List();
 
+	ArrayList<Integer> listIdGat = new ArrayList<Integer>();
+
+
 	//composents
 	JLabel lblCake = new JLabel();
+	private JTextField cakeSearch;
 
 	/**
 	 * Create the frame.
@@ -67,6 +75,22 @@ public class GateauFenetre extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout());
 		setBounds(0, 0, longueur, hauteur);
+	//----------------------------- initialisation des listes ---------------------------
+
+		// liste gateau
+		for(Gateau g: gfm.listeGateaux()) {
+			listGat.add(g.getNomGat());
+			listIdGat.add(g.getIdGat());
+		}
+		// liste ingredients
+		for(Ingredient i: gfm.listeIngredient(listIdGat.get(0))) {   // 1er id de la liste
+			listIngred.add(i.getQteIng() + " " +i.getNomIng());
+		}	
+		
+		//liste instructions et ordre
+		for(Instruction i: gfm.listeInstruction(listIdGat.get(0))) {
+			listInstruc.add(i.getIdOrdre() + " | " +i.getInstr());
+		}
 		
       
 //------------------------------------------------------------------------------------------------------
@@ -80,49 +104,36 @@ public class GateauFenetre extends JFrame {
 
 		getContentPane().add(JPListeGateaux,BorderLayout.CENTER);
 		
-		listGat.addItemListener(new ItemListener() {
+		listGat.addItemListener(new ItemListener() {             // gateau selectionné
 			public void itemStateChanged(ItemEvent item) {
 			//	System.out.println(item.getItem());
-				int test = (int) item.getItem();
 			//	System.out.println(listGat.getItem(test));
-				// liste ingredients
 				listIngred.removeAll();
-				listIngred.add(listGat.getItem(test));
-				
-				//liste instruction
 				listInstruc.removeAll();
-				listInstruc.add(listGat.getItem(test));
 
-				//img
-				//lblCake.setIcon(newCake);
+				//je recupere le gateau
+				int indexGat = (int) item.getItem();
+				int idGat = listIdGat.get(indexGat);
+				// liste ingredients
+				for(Ingredient i: gfm.listeIngredient(idGat)) {
+					listIngred.add(i.getQteIng() + " | " +i.getNomIng());
+				}	
+				
+				//liste instructions et ordre
+				for(Instruction i: gfm.listeInstruction(idGat)) {
+					listInstruc.add(i.getIdOrdre() + " | " +i.getInstr());
+				}	
+				
 				
 				//image
-				try {
-					URL url = new URL("https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/cake.png");
-					newImg = new ImageIcon(url);
-					 lblCake.setIcon(newImg);
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					 lblCake.setIcon(gfm.newImg(idGat));
+				
 				//TODO
 				//
 			}
 		});
-		listGat.setFont(new Font("Showcard Gothic", Font.BOLD | Font.ITALIC, 41));
+		listGat.setFont(new Font("SansSerif", Font.BOLD, 14));
 		listGat.setMultipleMode(true);
-		listGat.add("paris brest");
-		listGat.add("paris meuuuh");
-		listGat.add("paris brest");
-		listGat.add("paris brest");
-		listGat.add("paris brest");
-		listGat.add("paris caca");
-		listGat.add("paris brest");
-		
-
 		listGat.setBackground(new Color(135, 206, 250));
 		listGat.setMultipleSelections(false);
 		listGat.setForeground(Color.GRAY);
@@ -154,6 +165,7 @@ public class GateauFenetre extends JFrame {
 			} 
 			@Override
 			public void mouseClicked(MouseEvent e) {  //click
+				//TODO  recherche par ingredient
 			}  
 		});
 		
@@ -177,10 +189,22 @@ public class GateauFenetre extends JFrame {
 			} 
 			@Override
 			public void mouseClicked(MouseEvent e) {  //click
+				RecepteurSaisieGateau recepgat = new RecepteurSaisieGateau();
+				getContentPane().setVisible(false);                           // not good enought
 			}  
 		});
 		btnNouveauGateau.setBounds(60, 668, 154, 58);
 		JPListeGateaux.add(btnNouveauGateau);
+		
+		//input search gateau
+		cakeSearch = new JTextField();
+		cakeSearch.setBounds(10, 54, 204, 20);
+		JPListeGateaux.add(cakeSearch);
+		cakeSearch.setColumns(10);
+		
+		JLabel lblNewLabel = new JLabel();    // label "search"
+		lblNewLabel.setBounds(224, 54, 46, 20);
+		JPListeGateaux.add(lblNewLabel);
 
 //----------------------------------------------------------------------------------------------------
 		//   Panneau 2: Liste d'ingredients
@@ -198,51 +222,22 @@ public class GateauFenetre extends JFrame {
 		lblListeDingrdients.setBackground(new Color(255, 222, 173));
 		lblListeDingrdients.setBounds(0, 0, 428, 32);
 		JPListeIngredients.add(lblListeDingrdients);
-		
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
-		listIngred.add("blabl bla bla :   888 kg");
 
 
 		listIngred.setForeground(new Color(189, 183, 107));
-		listIngred.setFont(new Font("Bauhaus 93", Font.BOLD | Font.ITALIC, 23));
-		listIngred.setBounds(10, 61, 386, 169);
+		listIngred.setFont(new Font("Bell MT", Font.BOLD | Font.ITALIC, 25));
+		listIngred.setBounds(27, 50, 369, 222);
 		JPListeIngredients.add(listIngred);
 
 		//-------------------------------------------------------------------------------------
 		//   Panneau 3: liste d'instructions
-		JPanel listeInstructions = new JPanel();
-		listeInstructions.setBackground(Color.WHITE);
-		listeInstructions.setBorder(new EmptyBorder(0, 0,0,0));   
-		listeInstructions.setBounds(2*longueur/7, hauteur/3, 5*longueur/7, 2*hauteur/3);
-		listeInstructions.setLayout(null);                                   
-		getContentPane().add(listeInstructions,BorderLayout.CENTER);
-		
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
-		listInstruc.add("faire chauffer ta mere !!!!!");
+		JPanel JPlisteInstructions = new JPanel();
+		JPlisteInstructions.setBackground(Color.WHITE);
+		JPlisteInstructions.setBorder(new EmptyBorder(0, 0,0,0));   
+		JPlisteInstructions.setBounds(2*longueur/7, hauteur/3, 5*longueur/7, 2*hauteur/3);
+		JPlisteInstructions.setLayout(null);                                   
+		getContentPane().add(JPlisteInstructions,BorderLayout.CENTER);
+
 		
 		JLabel lblInstructions = new JLabel("Instructions");
 		lblInstructions.setHorizontalAlignment(SwingConstants.CENTER);
@@ -250,13 +245,13 @@ public class GateauFenetre extends JFrame {
 		lblInstructions.setForeground(new Color(255, 255, 0));
 		lblInstructions.setBackground(new Color(255, 0, 255));
 		lblInstructions.setBounds(107, 34, 355, 79);
-		listeInstructions.add(lblInstructions);
+		JPlisteInstructions.add(lblInstructions);
 
-		listInstruc.setFont(new Font("Chiller", Font.BOLD | Font.ITALIC, 33));
+		listInstruc.setFont(new Font("Century Gothic", Font.BOLD, 22));
 		listInstruc.setForeground(new Color(100, 149, 237));
 		listInstruc.setBackground(new Color(205, 133, 63));
 		listInstruc.setBounds(46, 117, 552, 406);
-		listeInstructions.add(listInstruc);
+		JPlisteInstructions.add(listInstruc);
 
 		//------------------------------------------------------------------------------------------
 		//   Panneau 4: img
@@ -269,7 +264,7 @@ public class GateauFenetre extends JFrame {
 		getContentPane().add(JPImgCake,BorderLayout.CENTER);
 		
 		lblCake.setBounds(5*longueur/7, 0, 2*longueur/7, hauteur/3);
-		lblCake.setIcon(imgCake);
+		lblCake.setIcon(newCake);
 		JPImgCake.add(lblCake);
 		
 		
@@ -279,7 +274,7 @@ public class GateauFenetre extends JFrame {
 		//   Panneau 1: Liste de gateaux
 		
 
-		
+		//-------------------------------- recuperation de la liste des gateau !!!!
 		
 	}
 }
