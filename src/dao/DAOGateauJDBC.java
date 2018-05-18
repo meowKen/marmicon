@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import metier.Gateau;
 import metier.Ingredient;
@@ -16,13 +17,18 @@ import metier.Recette;
 public class DAOGateauJDBC implements DAOGateau{
 
 	private Connection getConnection() throws SQLException {
-		return DriverManager.getConnection("jdbc:mysql://localhost/marmicon", "root", "");	
-	}
+		Properties properties = new Properties();
+		properties.setProperty("user", "root");
+		properties.setProperty("password", "");
+		properties.setProperty("useSSL", "false");
+		properties.setProperty("autoReconnect", "true");
+		return DriverManager.getConnection("jdbc:mysql://localhost:3306/marmicon?serverTimezone=UTC",properties);
+		}
 	public Gateau selectByID(Integer id)
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection conn = getConnection();
 		//Recupération gateau, sa recette et instructions
-		PreparedStatement ps = conn.prepareStatement("SELECT DISTINCT GA.id_gateau, GA.nom_gateau, RE.id_recette, RE.temps_prep, INS.indication, INS.id_ordre "
+		PreparedStatement ps = conn.prepareStatement("SELECT DISTINCT GA.id_gateau, GA.nom_gateau, GA.url_gateau, RE.id_recette, RE.temps_prep, INS.indication, INS.id_ordre "
 				+ "FROM GATEAU AS GA INNER JOIN RECETTE AS RE ON GA.id_gateau = RE.id_gateau "
 				+ "INNER JOIN INSTRUCTION AS INS ON RE.id_recette = INS.id_recette "
 				+ "WHERE GA.id_gateau = ?");
@@ -41,6 +47,7 @@ public class DAOGateauJDBC implements DAOGateau{
 		List<Instruction> listInt = new ArrayList();
 		String nomGateau = "";
 		String tempsPrep = "";
+		String urlGateau = "";
 		//Ajout des ingrédients dans la liste d'ingrédients
 		while(rs2.next()) {
 			listIng.add(new Ingredient(rs2.getString("nom_ingredient"), rs2.getString("qte_ingredient")));
@@ -49,9 +56,10 @@ public class DAOGateauJDBC implements DAOGateau{
 			listInt.add(new Instruction(rs.getInt("id_ordre"), rs.getString("indication")));
 			tempsPrep = rs.getString("temps_prep");
 			nomGateau = rs.getString("nom_gateau");
+			urlGateau = rs.getString("url_gateau");
 		}
 		Recette rec = new Recette(tempsPrep, listIng, listInt);
-		Gateau gat = new Gateau(nomGateau, rec);
+		Gateau gat = new Gateau(nomGateau, rec, urlGateau);
 		conn.close();
 		return gat;
 	}
@@ -60,11 +68,11 @@ public class DAOGateauJDBC implements DAOGateau{
 			throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Connection conn = getConnection();
 		//Recupération gateau, sa recette et instructions
-		PreparedStatement ps = conn.prepareStatement("SELECT id_gateau, nom_gateau FROM GATEAU");
+		PreparedStatement ps = conn.prepareStatement("SELECT id_gateau, nom_gateau, url_gateau FROM GATEAU");
 		ResultSet rs = ps.executeQuery();
 		List<Gateau> listGat = new ArrayList();
 		while(rs.next()) {
-			listGat.add(new Gateau(rs.getInt("id_gateau"), rs.getString("nom_gateau")));
+			listGat.add(new Gateau(rs.getInt("id_gateau"), rs.getString("nom_gateau"), rs.getString("url_gateau")));
 		}
 		return listGat;
 	}
@@ -73,7 +81,7 @@ public class DAOGateauJDBC implements DAOGateau{
 		Connection conn = getConnection();
 		String reqInsert = "";
 		//Insertion Gateau
-		reqInsert = "INSERT INTO gateau(nom_gateau) VALUES ('"+gat.getName().replaceAll("'", "\'")+"');";
+		reqInsert = "INSERT INTO gateau(nom_gateau) VALUES ('"+gat.getNomGat().replaceAll("'", "\'")+"');";
 		PreparedStatement ps = conn.prepareStatement(reqInsert);
 		ps.executeUpdate();
 		ps = conn.prepareStatement("SELECT DISTINCT LAST_INSERT_ID() as id_gateau FROM gateau");
@@ -84,7 +92,7 @@ public class DAOGateauJDBC implements DAOGateau{
 			idGat = rs.getInt("id_gateau");
 		}
 		//Insertion de la recette
-		reqInsert = "INSERT INTO recette(id_gateau, temps_prep) VALUES ("+idGat+",'"+gat.getRecette().getTempsPrep()+"');";
+		reqInsert = "INSERT INTO recette(id_gateau, temps_prep) VALUES ("+idGat+",'"+gat.getRecette().getTmpPrep()+"');";
 		ps = conn.prepareStatement(reqInsert);
 		ps.executeUpdate();
 		ps = conn.prepareStatement("SELECT DISTINCT LAST_INSERT_ID() as id_recette FROM recette");
@@ -97,10 +105,10 @@ public class DAOGateauJDBC implements DAOGateau{
 		//Insertion des instructions
 		reqInsert = "INSERT INTO instruction(id_recette, indication, id_ordre) VALUES (?,?,?)";
 		ps = conn.prepareStatement(reqInsert);
-		for (Instruction ins : gat.getRecette().getListInt()) {
+		for (Instruction ins : gat.getRecette().getListInstr()) {
 			ps.setInt(1, idRec);
-			ps.setString(2, ins.getIndication());
-			ps.setInt(3, ins.getOrdre());
+			ps.setString(2, ins.getInstr());
+			ps.setInt(3, ins.getIdOrdre());
 			ps.addBatch();
 			
 		}
@@ -108,9 +116,9 @@ public class DAOGateauJDBC implements DAOGateau{
 		//Insertion des ingrédients :
 		reqInsert = "INSERT INTO ingredient(nom_ingredient, qte_ingredient, id_recette) VALUES (?,?,?)";
 		ps = conn.prepareStatement(reqInsert);
-		for (Ingredient ing : gat.getRecette().getListIng()) {
-			ps.setString(1, ing.getNom());
-			ps.setString(2, ing.getQte());
+		for (Ingredient ing : gat.getRecette().getListIngre()) {
+			ps.setString(1, ing.getNomIng());
+			ps.setString(2, ing.getQteIng());
 			ps.setInt(3, idRec);
 			ps.addBatch();
 		}
@@ -142,7 +150,7 @@ public class DAOGateauJDBC implements DAOGateau{
 		ResultSet rs = ps.executeQuery();
 		List<Gateau> listGat = new ArrayList();
 		while(rs.next()) {
-			listGat.add(new Gateau(rs.getInt("id_gateau"), rs.getString("nom_gateau")));
+			listGat.add(new Gateau(rs.getInt("id_gateau"), rs.getString("nom_gateau"), rs.getString("url_gateau")));
 		}
 		return listGat;
 	}
