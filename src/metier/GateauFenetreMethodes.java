@@ -36,9 +36,19 @@ public class GateauFenetreMethodes {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		return listeGat;
-
+	}
+	
+public List<Gateau> listGatByName(String cake){
+	
+	try {
+		listeGat = gatJDBC.searchByName(cake);
+	} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return listeGat;
+		
 	}
 
 	//liste des ingredients
@@ -75,7 +85,7 @@ public class GateauFenetreMethodes {
 
 	//Image
 	public ImageIcon newImg(int idGat) {
-		ImageIcon newCake = new ImageIcon("images/newCake.png");
+		ImageIcon newCake = new ImageIcon("images/cupCake.png");
 		Gateau g;
 			 try {
 				g = gatJDBC.selectByID(idGat);
@@ -91,4 +101,6 @@ public class GateauFenetreMethodes {
 			
 		return newCake;
 	}
+	
+	
 }
