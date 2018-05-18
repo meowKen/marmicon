@@ -145,8 +145,13 @@ public class DAOGateauJDBC implements DAOGateau{
 	public List<Gateau> searchByName(String search) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Connection conn = getConnection();
 		//Recupération gateau, sa recette et instructions
-		PreparedStatement ps = conn.prepareStatement("SELECT id_gateau, nom_gateau FROM GATEAU WHERE nom_gateau LIKE %?%");
-		ps.setString(1, search);
+		PreparedStatement ps = conn.prepareStatement("SELECT DISTINCT GAT.id_gateau, nom_gateau, url_gateau FROM gateau as GAT "
+                + " INNER JOIN recette as RE ON RE.id_gateau = GAT.id_gateau "
+                + " INNER JOIN ingredient as ING ON RE.id_recette = ING.id_recette "
+                + " WHERE nom_gateau LIKE ? OR ING.nom_ingredient LIKE ?;");
+		ps.setString(1, '%'+search+'%');
+		ps.setString(2, '%'+search+'%');
+
 		ResultSet rs = ps.executeQuery();
 		List<Gateau> listGat = new ArrayList();
 		while(rs.next()) {
