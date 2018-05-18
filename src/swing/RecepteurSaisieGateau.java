@@ -64,7 +64,7 @@ public class RecepteurSaisieGateau extends JFrame implements ActionListener, Win
 		super("Saisie d'une nouvelle recette");
 	
 		//PANEL
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 
 		//listener assignment
@@ -193,7 +193,7 @@ public class RecepteurSaisieGateau extends JFrame implements ActionListener, Win
 	public void windowClosed(WindowEvent arg0) {
 		
 		if(arg0.getSource() == rsing) {
-			System.out.println("rsing fermée vu depuis rsg");
+			System.out.println("rsing fermÃ©e vu depuis rsg");
 			ingredients = rsing.getListIngredient();
 			System.out.println(ingredients);
 			liste1.removeAll();
@@ -203,7 +203,7 @@ public class RecepteurSaisieGateau extends JFrame implements ActionListener, Win
 		}
 		
 		if(arg0.getSource() == rsins) {
-			System.out.println("rsins fermée vu depuis rsg");
+			System.out.println("rsins fermÃ©e vu depuis rsg");
 			instructions = rsins.getInstructions();
 			System.out.println(instructions);
 			liste2.removeAll();
