@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import javafx.scene.Cursor;
+import java.awt.Cursor;
 import metier.Gateau;
 import metier.GateauFenetreMethodes;
 import metier.Ingredient;
@@ -44,7 +44,10 @@ public class GateauFenetre extends JFrame {
 	GateauFenetreMethodes gfm = new GateauFenetreMethodes();
 	
 	//img
-	ImageIcon newCake = new ImageIcon("images/newCake.png");
+	ImageIcon newCake = new ImageIcon("images/cupCake.png");
+	ImageIcon searchIcon = new ImageIcon("images/search.png");
+	ImageIcon addIcon = new ImageIcon("images/add.png");
+	ImageIcon addIcon2 = new ImageIcon("images/add2.png");
 
 	//ImageIcon newImg;
 	
@@ -59,10 +62,13 @@ public class GateauFenetre extends JFrame {
 
 	ArrayList<Integer> listIdGat = new ArrayList<Integer>();
 
+	String cake = "pomme";
 
 	//composents
 	JLabel lblCake = new JLabel();
 	private JTextField cakeSearch;
+	JButton butSearch = new JButton();    
+
 
 	/**
 	 * Create the frame.
@@ -84,7 +90,7 @@ public class GateauFenetre extends JFrame {
 		}
 		// liste ingredients
 		for(Ingredient i: gfm.listeIngredient(listIdGat.get(0))) {   // 1er id de la liste
-			listIngred.add(i.getQteIng() + " " +i.getNomIng());
+			listIngred.add(i.getQteIng() + " | " +i.getNomIng());
 		}	
 		
 		//liste instructions et ordre
@@ -146,46 +152,16 @@ public class GateauFenetre extends JFrame {
 		lblGateaux.setBounds(10, 22, 204, 32);
 		JPListeGateaux.add(lblGateaux);
 		
-		//bouttons x2
-		JButton btnRechercheParIngredients = new JButton("Recherche par INGREDIENTS");
-		
-		btnRechercheParIngredients.addMouseListener(new MouseAdapter() {             //  recherche par ingredient
-			@Override
-			public void mouseEntered(MouseEvent arg0) { // souris sur le boutton
-				btnRechercheParIngredients.setBackground(Color.BLUE);
-				//btnRechercheParIngredients.setCursor(Cursor.OPEN_HAND);     // not working
-				btnRechercheParIngredients.setForeground(Color.WHITE);
-
-				}
-			@Override
-			public void mouseExited(MouseEvent e) {  // souris quitte le boutton
-				btnRechercheParIngredients.setBackground(new Color(240,240,240));
-				btnRechercheParIngredients.setForeground(Color.BLACK);
-
-			} 
-			@Override
-			public void mouseClicked(MouseEvent e) {  //click
-				//TODO  recherche par ingredient
-			}  
-		});
-		
-		btnRechercheParIngredients.setBounds(51, 583, 173, 58);
-		JPListeGateaux.add(btnRechercheParIngredients);
-		
-		JButton btnNouveauGateau = new JButton("Nouveau Gateau");
+		JButton btnNouveauGateau = new JButton();
 		btnNouveauGateau.addMouseListener(new MouseAdapter() {                           // nouveau gateau
 			@Override
 			public void mouseEntered(MouseEvent arg0) { // souris sur le boutton
-				btnNouveauGateau.setBackground(Color.BLUE);
-				//btnRechercheParIngredients.setCursor(Cursor.OPEN_HAND);     // not working
-				btnNouveauGateau.setForeground(Color.WHITE);
-
+				btnNouveauGateau.setIcon(addIcon2);
+			//	btnNouveauGateau.setCursor();
 				}
 			@Override
 			public void mouseExited(MouseEvent e) {  // souris quitte le boutton
-				btnNouveauGateau.setBackground(new Color(240,240,240));
-				btnNouveauGateau.setForeground(Color.BLACK);
-
+				btnNouveauGateau.setIcon(addIcon);
 			} 
 			@Override
 			public void mouseClicked(MouseEvent e) {  //click
@@ -193,18 +169,57 @@ public class GateauFenetre extends JFrame {
 				getContentPane().setVisible(false);                           // not good enought
 			}  
 		});
-		btnNouveauGateau.setBounds(60, 668, 154, 58);
+		btnNouveauGateau.setBounds(JPListeGateaux.getWidth()/2 - addIcon.getIconWidth()/2, JPListeGateaux.getHeight() - 2*addIcon.getIconHeight(), addIcon.getIconWidth(), addIcon.getIconHeight());
+		btnNouveauGateau.setIcon(addIcon);
+		btnNouveauGateau.setBackground(JPListeGateaux.getBackground());
+		btnNouveauGateau.setBorderPainted(false);
 		JPListeGateaux.add(btnNouveauGateau);
+		
 		
 		//input search gateau
 		cakeSearch = new JTextField();
+		cakeSearch.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseExited(MouseEvent e) {
+				String cake = cakeSearch.getText();
+			}
+		});
 		cakeSearch.setBounds(10, 54, 204, 20);
 		JPListeGateaux.add(cakeSearch);
 		cakeSearch.setColumns(10);
+
 		
-		JLabel lblNewLabel = new JLabel();    // label "search"
-		lblNewLabel.setBounds(224, 54, 46, 20);
-		JPListeGateaux.add(lblNewLabel);
+		// label "search"
+		butSearch.addMouseListener(new MouseAdapter() {  
+			@Override
+			public void mouseClicked(MouseEvent arg0) {  //click
+				cake = cakeSearch.getText();
+				listIngred.removeAll();
+				listInstruc.removeAll();
+				listGat.removeAll();
+				
+				for(Gateau g: gfm.listGatByName(cake)) {
+					listGat.add(g.getNomGat());
+					listIdGat.add(g.getIdGat());
+				}
+				// liste ingredients
+				for(Ingredient i: gfm.listeIngredient(listIdGat.get(0))) {   // 1er id de la liste
+					listIngred.add(i.getQteIng() + " | " +i.getNomIng());
+				}	
+				
+				//liste instructions et ordre
+				for(Instruction i: gfm.listeInstruction(listIdGat.get(0))) {
+					listInstruc.add(i.getIdOrdre() + " | " +i.getInstr());
+				}
+				//image
+				 lblCake.setIcon(gfm.newImg(0));
+				
+			}
+		});
+		butSearch.setBounds(224, 54, searchIcon.getIconWidth(), searchIcon.getIconHeight());
+		butSearch.setBorder(null);
+		butSearch.setIcon(searchIcon);
+		JPListeGateaux.add(butSearch);
 
 //----------------------------------------------------------------------------------------------------
 		//   Panneau 2: Liste d'ingredients
