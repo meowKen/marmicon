@@ -15,6 +15,7 @@ import javax.swing.border.EmptyBorder;
 
 
 import metier.InputControler;
+import metier.Instruction;
 import metier.Ingredient;
 
 public class RecepteurSaisieInstruction extends JFrame implements ActionListener{
@@ -27,7 +28,7 @@ public class RecepteurSaisieInstruction extends JFrame implements ActionListener
 	private JButton btnValide;
 	private List liste;
 	private boolean sendIngredient = false;
-	private java.util.List<Ingredient> ingredients;
+	private java.util.List<Instruction> instructions;
 	
 
 	
@@ -35,7 +36,9 @@ public class RecepteurSaisieInstruction extends JFrame implements ActionListener
 	 * Create the frame.
 	 */
 	public RecepteurSaisieInstruction() {
-		ingredients = new ArrayList<Ingredient>();
+		
+		instructions = new ArrayList<Instruction>();
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 596, 423);
 		contentPane = new JPanel();
@@ -52,14 +55,14 @@ public class RecepteurSaisieInstruction extends JFrame implements ActionListener
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
-		JLabel lblNewLabel_3 = new JLabel("Ingredient \u00E0 ajouter");
+		JLabel lblNewLabel_3 = new JLabel("Instructions de la recette");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.gridx = 0;
 		gbc_lblNewLabel_3.gridy = 0;
 		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
-		JLabel lblNewLabel = new JLabel("Nom de l'ingr\u00E9dient");
+		JLabel lblNewLabel = new JLabel("instruction : ");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
@@ -123,22 +126,45 @@ public class RecepteurSaisieInstruction extends JFrame implements ActionListener
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
 		System.out.println("actionPerformed");
+		
 		if(e.getSource() == btnAjout) {
 			System.out.println("ajout");
+			if(! InputControler.isUniform(textField.getText(), ' ')
+					&& ! textField.getText().isEmpty()) {
+				if(liste.getSelectedIndex() == -1) {
+				liste.add(textField.getText());
+				} else {
+					liste.add(textField.getText(), liste.getSelectedIndex()+1);
+				}
+				textField.setText("");
+			}
 		}
+		
 		if(e.getSource() == btnSupprime) {
-			System.out.println("supprime");
+			if(liste.getSelectedIndex() != -1) {
+				liste.remove(liste.getSelectedIndex());
+			}
 		}
 		
 		if(e.getSource() == btnToutSupprime) {
-			System.out.println("supprime tout");
+			liste.removeAll();
 		}
 		
 		if(e.getSource() == btnValide) {
 			System.out.println("valide");
+			instructions = new ArrayList<Instruction>();
+			for(int i=0; i<liste.getItemCount(); i++) {
+				instructions.add(new Instruction(i, liste.getItem(i)));
+			}
+			this.dispose();
 		}
 		
+	}
+	
+	public java.util.List<Instruction> getInstructions(){
+		return instructions;
 	}
 	
 }
