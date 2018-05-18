@@ -20,6 +20,8 @@ public class Recette {
 		this.idRec = idRec;
 		this.idGat = idGat;
 		this.tmpPrep = tmpPrep;
+		this.listIngre = listIngre;
+		this.listInstr = listInstr;
 	}
 
 	public String getTmpPrep() {
